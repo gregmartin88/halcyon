@@ -1,0 +1,25 @@
+{
+  "rows": 6000,
+  "seed": 42,
+  "date_range": [
+    "2026-01-01",
+    "2026-06-30"
+  ],
+  "routing_intercept": -2.35,
+  "routing_coefficients": {
+    "log_amount_z": 0.85,
+    "vehicle_age": 0.045,
+    "tenure_lt_12m": 0.55,
+    "prior_claims": 0.4,
+    "liability": 0.3,
+    "latent_fraud": 1.6
+  },
+  "injected_bias_logit_by_zip_tier": {
+    "1": 0.0,
+    "2": 0.0,
+    "3": 0.0,
+    "4": 0.85,
+    "5": 1.25
+  },
+  "note": "latent_fraud is independent of zip_tier; any tier effect on routing beyond the legitimate factors is the injected bias."
+}
