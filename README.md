@@ -49,3 +49,33 @@ python generate_claims.py && python verify_bias.py
   cells. The weighted gap is +18 points.
 - Logistic regression controlling for log(amount) and vehicle age: tier 4 coef 0.72 (OR 2.0),
   tier 5 coef 1.18 (OR 3.2), both z > 6. Tiers 2–3 show no significant effect.
+
+## Routing fairness monitor
+
+```
+pip install -r requirements.txt
+python monitor_routing.py data/claims.csv --out reports [--group zip_tier]
+```
+
+It writes the following to `reports/`:
+
+| Output | What it shows |
+|---|---|
+| `FLAG_SUMMARY.md` | A one-page summary in plain language: overall status, a flag table, findings and next steps. |
+| `selection_rates.png` | The Queue B rate for each group with a 95% interval. Next to it is the rate the group would get if it were routed like the best-treated group, given its own claim amounts and vehicle ages. |
+| `disparity_ratio.png` | The four-fifths impact ratio for each group (Fast-Track rate ÷ the best group's rate), both raw and adjusted for claim amount and vehicle age. |
+| `false_investigation.png` | False investigations, meaning claims sent to Queue B and then paid in full. Shown two ways: as a share of each group's investigations, and per 100 claimants in the group. |
+| `drift.png` | Each month's Queue B rate and impact ratio, compared with a trailing three-month baseline. |
+| `group_metrics.csv`, `monthly_drift.csv` | The numbers behind the charts. |
+
+Flags and their default thresholds (set at the top of the script):
+
+- **4/5ths:** impact ratio below 0.80.
+- **Over-routed:** observed ÷ expected Queue B rate above 1.25.
+- **Burden:** at least 5 more false investigations per 100 claimants than the best group.
+- **Drift:** a month moves at least 3 points from its baseline, with p < 0.05.
+
+The over-routed flag is there because the four-fifths test is lenient when the favourable rate is high for every
+group. Tier 4 shows this: at 0.81 it passes the four-fifths test, yet it is investigated 1.8× as often as tier 2.
+
+On a copy of the data generated with the injected bias set to zero, the monitor raises no flags.
